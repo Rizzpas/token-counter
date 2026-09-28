@@ -44,7 +44,7 @@ export type FilterOption = 'all' | 'ready' | 'not-ready';
 
 export const DEFAULT_PROVIDERS: Pick<Provider, 'name' | 'defaultDurationMinutes'>[] = [
   { name: 'Gemini', defaultDurationMinutes: 7 * 24 * 60 },
-  { name: 'Claude', defaultDurationMinutes: 2 * 24 * 60 },
+  { name: 'Claude', defaultDurationMinutes: 7 * 24 * 60 },
 ];
 
 export const DURATION_PRESETS = [

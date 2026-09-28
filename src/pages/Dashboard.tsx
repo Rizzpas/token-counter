@@ -141,16 +141,16 @@ export function Dashboard() {
   // Seed sample accounts (useful to preview 10 cards layout immediately)
   const handleLoadSampleAccounts = () => {
     const samples = [
-      { email: 'mike.dev@google.com', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: true },
-      { email: 'zilong.engineer@antigravity.ai', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: false },
-      { email: 'sarah.ai@anthropic-team.org', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: true },
-      { email: 'alex.chen@work-ide.io', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: false },
-      { email: 'elena.rostova@cloudscale.net', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: true },
-      { email: 'marcus.vance@codex-lab.org', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: false },
-      { email: 'priya.sharma@deeplearning.io', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: true },
-      { email: 'kenji.sato@tokyo-research.jp', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: true },
-      { email: 'david.miller@kernel-ops.dev', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: false },
-      { email: 'chloe.dubois@paris-ai.fr', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: false },
+      { email: 'mike.dev@google.com', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: true, claudeActive: true },
+      { email: 'zilong.engineer@antigravity.ai', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: false, claudeActive: false },
+      { email: 'sarah.ai@anthropic-team.org', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: false, claudeActive: true },
+      { email: 'alex.chen@work-ide.io', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: true, claudeActive: false },
+      { email: 'elena.rostova@cloudscale.net', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: true, claudeActive: true },
+      { email: 'marcus.vance@codex-lab.org', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: false, claudeActive: false },
+      { email: 'priya.sharma@deeplearning.io', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: true, claudeActive: true },
+      { email: 'kenji.sato@tokyo-research.jp', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: false, claudeActive: true },
+      { email: 'david.miller@kernel-ops.dev', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: true, claudeActive: false },
+      { email: 'chloe.dubois@paris-ai.fr', geminiDuration: 7 * 24 * 60, claudeDuration: 7 * 24 * 60, geminiActive: false, claudeActive: false },
     ];
 
     samples.forEach((sample, idx) => {
@@ -169,7 +169,7 @@ export function Dashboard() {
       }
 
       if (sample.claudeActive) {
-        const offsetHours = (idx * 9) % (2 * 24);
+        const offsetHours = (idx * 14) % (7 * 24);
         const startTime = new Date(Date.now() - offsetHours * 3600000);
         updateProvider(acc.id, acc.providers[1].id, {
           timer: createTimer(sample.claudeDuration, startTime),
