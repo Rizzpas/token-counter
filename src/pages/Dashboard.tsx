@@ -19,7 +19,6 @@ import {
   Inbox,
   CheckCircle2,
   Clock,
-  AlertTriangle,
 } from 'lucide-react';
 import { StatusBadge } from '../components/StatusBadge';
 import { ProgressBar } from '../components/ProgressBar';
@@ -213,15 +212,10 @@ export function Dashboard() {
                 <span className="text-[11px]">Ready:</span>
                 <span className="font-semibold font-mono">{stats.ready}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400">
-                <Clock className="h-3 w-3" />
-                <span className="text-[11px]">Active:</span>
-                <span className="font-semibold font-mono">{stats.active}</span>
-              </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-amber-500/20 bg-amber-500/5 text-amber-600 dark:text-amber-400">
-                <AlertTriangle className="h-3 w-3" />
-                <span className="text-[11px]">Expiring:</span>
-                <span className="font-semibold font-mono">{stats.expiringSoon}</span>
+                <Clock className="h-3 w-3" />
+                <span className="text-[11px]">Not Ready:</span>
+                <span className="font-semibold font-mono">{stats.notReady}</span>
               </div>
             </div>
           )}
