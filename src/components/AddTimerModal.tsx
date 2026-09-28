@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { DURATION_PRESETS } from '../types/account';
 import { formatDateTime, toDateTimeLocalString } from '../utils/formatting';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from './ui/dialog';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Calendar, Clock, Timer } from 'lucide-react';
 
 type Props = {
   isOpen: boolean;
@@ -57,69 +68,68 @@ export function AddTimerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-      />
-      <div className="relative bg-zinc-900 border border-zinc-700/50 rounded-xl shadow-2xl p-6 w-full max-w-md mx-4 animate-scale-in">
-        <h3 className="text-lg font-semibold text-zinc-100 mb-4">
-          Start {providerName} Timer
-        </h3>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent onClose={onClose} className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <Timer className="h-4 w-4 text-blue-500" />
+            <DialogTitle>Start {providerName} Timer</DialogTitle>
+          </div>
+          <DialogDescription>
+            Configure the countdown duration and start time for quota reset.
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Duration Presets */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
+            <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
               Duration
             </label>
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-1.5">
               {DURATION_PRESETS.map((preset) => (
-                <button
+                <Button
                   key={preset.minutes}
                   type="button"
+                  size="xs"
+                  variant={!isCustom && durationMinutes === preset.minutes ? 'default' : 'outline'}
                   onClick={() => {
                     setDurationMinutes(preset.minutes);
                     setIsCustom(false);
                   }}
-                  className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                    !isCustom && durationMinutes === preset.minutes
-                      ? 'bg-blue-600/20 text-blue-400 border-blue-500/40'
-                      : 'bg-zinc-800 text-zinc-400 border-zinc-700/50 hover:bg-zinc-700'
-                  }`}
+                  className="h-7 text-xs"
                 >
                   {preset.label}
-                </button>
+                </Button>
               ))}
-              <button
+              <Button
                 type="button"
+                size="xs"
+                variant={isCustom ? 'default' : 'outline'}
                 onClick={() => setIsCustom(true)}
-                className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                  isCustom
-                    ? 'bg-blue-600/20 text-blue-400 border-blue-500/40'
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700/50 hover:bg-zinc-700'
-                }`}
+                className="h-7 text-xs"
               >
                 Custom
-              </button>
+              </Button>
             </div>
 
             {isCustom && (
-              <div className="flex gap-2">
-                <input
+              <div className="flex gap-2 mt-2">
+                <Input
                   type="number"
                   min="1"
                   value={customDuration}
                   onChange={(e) => setCustomDuration(e.target.value)}
-                  placeholder="Duration"
-                  className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700/50 rounded-lg text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  placeholder="e.g. 12"
+                  className="h-8"
+                  autoFocus
                 />
                 <select
                   value={customUnit}
                   onChange={(e) =>
                     setCustomUnit(e.target.value as 'hours' | 'days')
                   }
-                  className="px-3 py-2 bg-zinc-800 border border-zinc-700/50 rounded-lg text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  className="h-8 rounded-md border border-zinc-200 bg-white px-2.5 text-xs text-zinc-800 shadow-2xs dark:border-zinc-800 dark:bg-zinc-950/60 dark:text-zinc-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
                 >
                   <option value="hours">Hours</option>
                   <option value="days">Days</option>
@@ -130,43 +140,40 @@ export function AddTimerModal({
 
           {/* Start Date/Time */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
-              Start date & time
+            <label className="flex items-center gap-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+              <Calendar className="h-3 w-3 text-zinc-400" />
+              Start Date & Time
             </label>
-            <input
+            <Input
               type="datetime-local"
               value={startDateTime}
               onChange={(e) => setStartDateTime(e.target.value)}
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700/50 rounded-lg text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              className="h-8 font-mono"
             />
           </div>
 
           {/* Calculated Reset Date */}
-          <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/30">
-            <p className="text-xs text-zinc-500 mb-1">Reset date</p>
-            <p className="text-sm font-medium text-zinc-200">
+          <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-2.5 dark:border-zinc-800/80 dark:bg-zinc-950/50">
+            <div className="flex items-center gap-1 text-[11px] text-zinc-500 mb-0.5">
+              <Clock className="h-3 w-3" />
+              <span>Calculated Reset Time</span>
+            </div>
+            <p className="text-xs font-semibold font-mono text-zinc-900 dark:text-zinc-100">
               {formatDateTime(resetDate.toISOString())}
             </p>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-zinc-200 bg-zinc-800 hover:bg-zinc-700 rounded-lg border border-zinc-700/50 transition-colors"
-            >
+          {/* Footer */}
+          <DialogFooter className="pt-2">
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-            >
+            </Button>
+            <Button type="submit" size="sm">
               Start Timer
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

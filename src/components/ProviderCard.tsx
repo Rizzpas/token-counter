@@ -4,13 +4,16 @@ import { TimerDisplay } from './TimerDisplay';
 import { AddTimerModal } from './AddTimerModal';
 import { ConfirmDialog } from './ConfirmDialog';
 import { getTimerStatus, createTimer } from '../utils/timer';
+import { Button } from './ui/button';
+import { Play, RotateCcw, Sparkles } from 'lucide-react';
 
 type Props = {
   provider: Provider;
   onUpdateProvider: (updates: Partial<Provider>) => void;
+  compact?: boolean;
 };
 
-export function ProviderCard({ provider, onUpdateProvider }: Props) {
+export function ProviderCard({ provider, onUpdateProvider, compact = false }: Props) {
   const [showTimerModal, setShowTimerModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -24,43 +27,45 @@ export function ProviderCard({ provider, onUpdateProvider }: Props) {
 
   const handleConfirmReset = () => {
     setShowResetConfirm(false);
-    // Allow user to immediately configure the new timer
     setShowTimerModal(true);
   };
 
   if (!provider.enabled) return null;
 
   return (
-    <div className="flex-1 min-w-[200px] p-4 rounded-xl bg-zinc-950/40 border border-zinc-800/60 transition-colors">
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold text-zinc-200 tracking-wide">{provider.name}</h4>
-      </div>
+    <div className="rounded-lg border border-zinc-200/70 bg-zinc-50/60 p-2.5 dark:border-zinc-800/80 dark:bg-zinc-950/40 transition-colors">
+      <div className="flex items-center justify-between gap-1 mb-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Sparkles className="h-3 w-3 text-zinc-400 dark:text-zinc-500 shrink-0" />
+          <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+            {provider.name}
+          </span>
+        </div>
 
-      <TimerDisplay timer={isReady ? undefined : provider.timer} />
-
-      <div className="mt-4">
         {isReady ? (
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             onClick={() => setShowTimerModal(true)}
-            className="w-full py-2 px-3 text-xs font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer"
+            className="h-5 px-1.5 text-[10px] text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-950/30 font-medium"
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Start Timer
-          </button>
+            <Play className="h-2.5 w-2.5 mr-0.5 fill-current" />
+            Start
+          </Button>
         ) : (
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             onClick={() => setShowResetConfirm(true)}
-            className="w-full py-2 px-3 text-xs font-semibold text-zinc-300 bg-zinc-800/70 hover:bg-zinc-700 border border-zinc-700/60 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer"
+            className="h-5 px-1.5 text-[10px] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800"
           >
-            <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Reset {provider.name}
-          </button>
+            <RotateCcw className="h-2.5 w-2.5 mr-0.5" />
+            Reset
+          </Button>
         )}
       </div>
+
+      <TimerDisplay timer={isReady ? undefined : provider.timer} compact={compact} />
 
       <AddTimerModal
         isOpen={showTimerModal}

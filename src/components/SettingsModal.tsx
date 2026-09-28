@@ -1,8 +1,25 @@
 import { useState, useRef } from 'react';
-import type { AppSettings } from '../types/account';
+import type { AppSettings, Account } from '../types/account';
 import { exportData, importData, clearAllData } from '../utils/storage';
-import type { Account } from '../types/account';
 import { ConfirmDialog } from './ConfirmDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from './ui/dialog';
+import { Button } from './ui/button';
+import {
+  Settings as SettingsIcon,
+  Sun,
+  Moon,
+  Monitor,
+  Bell,
+  Download,
+  Upload,
+  Trash2,
+} from 'lucide-react';
 
 type Props = {
   isOpen: boolean;
@@ -44,13 +61,11 @@ export function SettingsModal({
     } catch (err: any) {
       setImportError(err.message || 'Failed to import data');
     }
-    // Reset input
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleNotificationToggle = async (key: string, value: boolean) => {
     if (key === 'enabled' && value) {
-      // Request notification permission
       if ('Notification' in window) {
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
@@ -64,105 +79,135 @@ export function SettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-      />
-      <div className="relative bg-zinc-900 border border-zinc-700/50 rounded-xl shadow-2xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto animate-scale-in">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-zinc-100">Settings</h3>
-          <button
-            onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Appearance */}
-        <section className="mb-6">
-          <h4 className="text-sm font-semibold text-zinc-300 mb-3">
-            Appearance
-          </h4>
-          <div className="space-y-2">
-            {(['dark', 'light', 'system'] as const).map((theme) => (
-              <label
-                key={theme}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors"
-              >
-                <input
-                  type="radio"
-                  name="theme"
-                  checked={settings.theme === theme}
-                  onChange={() => onUpdateSettings({ theme })}
-                  className="w-4 h-4 text-blue-600 bg-zinc-700 border-zinc-600 focus:ring-blue-500/40 focus:ring-offset-0"
-                />
-                <span className="text-sm text-zinc-300 capitalize">
-                  {theme}
-                </span>
-              </label>
-            ))}
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent onClose={onClose} className="sm:max-w-md max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <SettingsIcon className="h-4 w-4 text-zinc-500" />
+            <DialogTitle>Settings</DialogTitle>
           </div>
-        </section>
+          <DialogDescription>
+            Manage application appearance, alerts, and local backup data.
+          </DialogDescription>
+        </DialogHeader>
 
-        {/* Notifications */}
-        <section className="mb-6">
-          <h4 className="text-sm font-semibold text-zinc-300 mb-3">
-            Notifications
-          </h4>
-          <div className="space-y-2">
-            {[
-              { key: 'enabled', label: 'Enable notifications' },
-              { key: 'notifyOnReady', label: 'Notify when an account becomes READY' },
-              { key: 'notify24h', label: 'Notify 24 hours before reset' },
-              { key: 'notify6h', label: 'Notify 6 hours before reset' },
-              { key: 'notify1h', label: 'Notify 1 hour before reset' },
-            ].map(({ key, label }) => (
-              <label
-                key={key}
-                className={`flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800/50 cursor-pointer transition-colors ${
-                  key !== 'enabled' && !settings.notifications.enabled
-                    ? 'opacity-40 pointer-events-none'
-                    : ''
+        <div className="space-y-4 text-xs">
+          {/* Theme */}
+          <div className="rounded-lg border border-zinc-200/80 p-3 dark:border-zinc-800/80">
+            <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+              Appearance
+            </h4>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { id: 'dark', label: 'Dark', icon: Moon },
+                { id: 'light', label: 'Light', icon: Sun },
+                { id: 'system', label: 'System', icon: Monitor },
+              ].map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onUpdateSettings({ theme: id as any })}
+                  className={`flex flex-col items-center justify-center gap-1.5 rounded-md border p-2 text-center transition-all ${
+                    settings.theme === id
+                      ? 'border-zinc-900 bg-zinc-100 font-semibold text-zinc-900 dark:border-zinc-100 dark:bg-zinc-800 dark:text-zinc-50 shadow-2xs'
+                      : 'border-zinc-200 hover:bg-zinc-50 text-zinc-600 dark:border-zinc-800 dark:hover:bg-zinc-800/50 dark:text-zinc-400'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="text-[11px]">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="rounded-lg border border-zinc-200/80 p-3 dark:border-zinc-800/80">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <Bell className="h-3.5 w-3.5 text-zinc-500" />
+                <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                  Browser Alerts
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  handleNotificationToggle(
+                    'enabled',
+                    !settings.notifications.enabled
+                  )
+                }
+                className={`relative inline-flex h-4 w-7 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                  settings.notifications.enabled
+                    ? 'bg-zinc-900 dark:bg-zinc-100'
+                    : 'bg-zinc-300 dark:bg-zinc-700'
                 }`}
               >
-                <input
-                  type="checkbox"
-                  checked={
-                    settings.notifications[
-                      key as keyof typeof settings.notifications
-                    ] as boolean
-                  }
-                  onChange={(e) =>
-                    handleNotificationToggle(key, e.target.checked)
-                  }
-                  className="w-4 h-4 text-blue-600 bg-zinc-700 border-zinc-600 rounded focus:ring-blue-500/40 focus:ring-offset-0"
+                <span
+                  className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white dark:bg-zinc-900 shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    settings.notifications.enabled ? 'translate-x-3' : 'translate-x-0'
+                  }`}
                 />
-                <span className="text-sm text-zinc-300">{label}</span>
-              </label>
-            ))}
-          </div>
-        </section>
+              </button>
+            </div>
 
-        {/* Data */}
-        <section>
-          <h4 className="text-sm font-semibold text-zinc-300 mb-3">Data</h4>
-          <div className="space-y-2">
-            <button
-              onClick={handleExport}
-              className="w-full px-4 py-2 text-sm font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 rounded-lg transition-colors text-left"
+            <div
+              className={`space-y-1.5 pt-1 transition-opacity ${
+                !settings.notifications.enabled ? 'opacity-40 pointer-events-none' : ''
+              }`}
             >
-              Export Data
-            </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full px-4 py-2 text-sm font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 rounded-lg transition-colors text-left"
-            >
-              Import Data
-            </button>
+              {[
+                { key: 'notifyOnReady', label: 'Notify when quota becomes READY' },
+                { key: 'notify24h', label: 'Notify 24 hours before reset' },
+                { key: 'notify6h', label: 'Notify 6 hours before reset' },
+                { key: 'notify1h', label: 'Notify 1 hour before reset' },
+              ].map(({ key, label }) => (
+                <label
+                  key={key}
+                  className="flex items-center gap-2 rounded px-1.5 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 cursor-pointer text-[11px] text-zinc-700 dark:text-zinc-300"
+                >
+                  <input
+                    type="checkbox"
+                    checked={
+                      settings.notifications[
+                        key as keyof typeof settings.notifications
+                      ] as boolean
+                    }
+                    onChange={(e) => handleNotificationToggle(key, e.target.checked)}
+                    className="h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Backup & Data */}
+          <div className="rounded-lg border border-zinc-200/80 p-3 dark:border-zinc-800/80">
+            <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+              Data Management
+            </h4>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={handleExport}
+                className="h-7 text-[11px] justify-center"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                Export JSON
+              </Button>
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-7 text-[11px] justify-center"
+              >
+                <Upload className="h-3 w-3 mr-1" />
+                Import JSON
+              </Button>
+            </div>
+
             <input
               ref={fileInputRef}
               type="file"
@@ -171,22 +216,26 @@ export function SettingsModal({
               className="hidden"
             />
             {importError && (
-              <p className="text-xs text-red-400 px-1">{importError}</p>
+              <p className="text-[11px] text-red-500 mb-2">{importError}</p>
             )}
-            <button
+
+            <Button
+              variant="destructive"
+              size="xs"
               onClick={() => setShowClearConfirm(true)}
-              className="w-full px-4 py-2 text-sm font-medium text-red-400 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 rounded-lg transition-colors text-left"
+              className="w-full h-7 text-[11px] justify-center"
             >
-              Clear All Data
-            </button>
+              <Trash2 className="h-3 w-3 mr-1" />
+              Clear All Stored Data
+            </Button>
           </div>
-        </section>
+        </div>
 
         <ConfirmDialog
           isOpen={showClearConfirm}
           onClose={() => setShowClearConfirm(false)}
-          title="Clear all data?"
-          message="This will permanently remove all locally stored accounts and timers."
+          title="Clear all stored data?"
+          message="This will permanently remove all accounts, timers, and preferences from this browser."
           confirmLabel="Clear Everything"
           confirmVariant="danger"
           onConfirm={() => {
@@ -194,7 +243,7 @@ export function SettingsModal({
             onClearAll();
           }}
         />
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

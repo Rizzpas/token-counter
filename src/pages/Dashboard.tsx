@@ -7,8 +7,24 @@ import { SearchBar } from '../components/SearchBar';
 import { FilterBar } from '../components/FilterBar';
 import { SortSelect } from '../components/SortSelect';
 import { SettingsModal } from '../components/SettingsModal';
-import { getTimerStatus, isTimerExpired, getRemainingMs } from '../utils/timer';
-import { loadSettings, saveSettings } from '../utils/storage';
+import { getTimerStatus, isTimerExpired, getRemainingMs, createTimer } from '../utils/timer';
+import { Button } from '../components/ui/button';
+import {
+  Timer,
+  Plus,
+  Settings,
+  LayoutGrid,
+  List,
+  Sparkles,
+  Inbox,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+} from 'lucide-react';
+import { StatusBadge } from '../components/StatusBadge';
+import { ProgressBar } from '../components/ProgressBar';
+import { formatRemainingTime } from '../utils/formatting';
+import { useCountdown } from '../hooks/useCountdown';
 
 export function Dashboard() {
   const {
@@ -28,6 +44,9 @@ export function Dashboard() {
   const [sort, setSort] = useState<SortOption>('soonest');
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+
+  useCountdown();
 
   // Filter & sort accounts
   const filteredAccounts = useMemo(() => {
@@ -67,7 +86,6 @@ export function Dashboard() {
         case 'soonest': {
           const aMin = getMinRemaining(a);
           const bMin = getMinRemaining(b);
-          // Ready accounts go to end, active sorted by soonest
           if (aMin === 0 && bMin === 0) return 0;
           if (aMin === 0) return 1;
           if (bMin === 0) return -1;
@@ -131,131 +149,330 @@ export function Dashboard() {
     });
   };
 
+  // Seed sample accounts (useful to preview 10 cards layout immediately)
+  const handleLoadSampleAccounts = () => {
+    const samples = [
+      { email: 'mike.dev@google.com', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: true },
+      { email: 'zilong.engineer@antigravity.ai', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: false },
+      { email: 'sarah.ai@anthropic-team.org', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: true },
+      { email: 'alex.chen@work-ide.io', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: false },
+      { email: 'elena.rostova@cloudscale.net', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: true },
+      { email: 'marcus.vance@codex-lab.org', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: false },
+      { email: 'priya.sharma@deeplearning.io', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: true },
+      { email: 'kenji.sato@tokyo-research.jp', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: true },
+      { email: 'david.miller@kernel-ops.dev', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: true, claudeActive: false },
+      { email: 'chloe.dubois@paris-ai.fr', geminiDuration: 7 * 24 * 60, claudeDuration: 2 * 24 * 60, geminiActive: false, claudeActive: false },
+    ];
+
+    samples.forEach((sample, idx) => {
+      const acc = addAccount(sample.email, [
+        { name: 'Gemini', enabled: true, defaultDurationMinutes: sample.geminiDuration },
+        { name: 'Claude', enabled: true, defaultDurationMinutes: sample.claudeDuration },
+      ]);
+
+      if (sample.geminiActive) {
+        // Varying offsets for realistic view
+        const offsetHours = (idx * 16) % (7 * 24);
+        const startTime = new Date(Date.now() - offsetHours * 3600000);
+        updateProvider(acc.id, acc.providers[0].id, {
+          timer: createTimer(sample.geminiDuration, startTime),
+        });
+      }
+
+      if (sample.claudeActive) {
+        const offsetHours = (idx * 9) % (2 * 24);
+        const startTime = new Date(Date.now() - offsetHours * 3600000);
+        updateProvider(acc.id, acc.providers[1].id, {
+          timer: createTimer(sample.claudeDuration, startTime),
+        });
+      }
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Header */}
-      <header className="border-b border-zinc-800/80">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-zinc-50 tracking-tight">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans transition-colors duration-150">
+      {/* Sleek Top Navbar */}
+      <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/80 dark:border-zinc-800/80 dark:bg-zinc-950/80 backdrop-blur-md">
+        <div className="max-w-[1720px] mx-auto px-3 sm:px-6 h-12 flex items-center justify-between gap-3">
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-2.5">
+            <div className="h-7 w-7 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 flex items-center justify-center shadow-2xs font-semibold">
+              <Timer className="h-4 w-4" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-xs sm:text-sm tracking-tight text-zinc-900 dark:text-zinc-50">
                 QuotaTrack
-              </h1>
-              <p className="text-sm text-zinc-500 mt-0.5">
-                Track your AI account reset cycles.
-              </p>
+              </span>
+              <span className="hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-zinc-100/50 dark:bg-zinc-900/50">
+                v1.0
+              </span>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowSettings(true)}
-                className="p-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors"
-                aria-label="Settings"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </button>
-              <button
-                onClick={() => setShowAddAccount(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Account
-              </button>
+          </div>
+
+          {/* Quick Metrics Ribbon (Header) */}
+          {accounts.length > 0 && (
+            <div className="hidden lg:flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40">
+                <span className="text-[11px] text-zinc-500">Accounts:</span>
+                <span className="font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                  {stats.total}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="h-3 w-3" />
+                <span className="text-[11px]">Ready:</span>
+                <span className="font-semibold font-mono">{stats.ready}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400">
+                <Clock className="h-3 w-3" />
+                <span className="text-[11px]">Active:</span>
+                <span className="font-semibold font-mono">{stats.active}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-amber-500/20 bg-amber-500/5 text-amber-600 dark:text-amber-400">
+                <AlertTriangle className="h-3 w-3" />
+                <span className="text-[11px]">Expiring:</span>
+                <span className="font-semibold font-mono">{stats.expiringSoon}</span>
+              </div>
             </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* View toggle */}
+            {accounts.length > 0 && (
+              <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-md p-0.5 bg-zinc-100/50 dark:bg-zinc-900/50">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1 rounded text-xs transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  }`}
+                  title="Compact Grid View (fits 10+ cards)"
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`p-1 rounded text-xs transition-colors ${
+                    viewMode === 'table'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  }`}
+                  title="Dense Table View"
+                >
+                  <List className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSettings(true)}
+              className="h-8 w-8 p-0"
+              aria-label="Settings"
+            >
+              <Settings className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={() => setShowAddAccount(true)}
+              className="h-8 px-2.5 sm:px-3 text-xs gap-1.5 font-medium"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add Account</span>
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        {/* Stats Cards */}
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-[1720px] w-full mx-auto px-3 sm:px-6 py-3 space-y-3">
+        {/* Controls Toolbar: Search, Filters, Sorters */}
         {accounts.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            <StatCard label="Total Accounts" value={stats.total} color="zinc" />
-            <StatCard label="Ready" value={stats.ready} color="emerald" />
-            <StatCard label="Active" value={stats.active} color="blue" />
-            <StatCard label="Expiring Soon" value={stats.expiringSoon} color="amber" />
-          </div>
-        )}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 pb-1">
+            <div className="flex-1 max-w-sm">
+              <SearchBar value={searchQuery} onChange={setSearchQuery} />
+            </div>
 
-        {/* Controls */}
-        {accounts.length > 0 && (
-          <div className="space-y-4 mb-6">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1">
-                <SearchBar value={searchQuery} onChange={setSearchQuery} />
-              </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <FilterBar value={filter} onChange={setFilter} counts={filterCounts} />
               <SortSelect value={sort} onChange={setSort} />
             </div>
-            <FilterBar value={filter} onChange={setFilter} counts={filterCounts} />
           </div>
         )}
 
-        {/* Account List */}
+        {/* View Mode: Compact Grid (fits 10 cards in viewport!) */}
         {filteredAccounts.length > 0 ? (
-          <div className="space-y-4">
-            {filteredAccounts.map((account) => (
-              <AccountCard
-                key={account.id}
-                account={account}
-                onUpdateProvider={(providerId, updates) =>
-                  updateProvider(account.id, providerId, updates)
-                }
-                onUpdateAccount={(updates) =>
-                  updateAccount(account.id, updates)
-                }
-                onDelete={() => deleteAccount(account.id)}
-              />
-            ))}
-          </div>
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+              {filteredAccounts.map((account) => (
+                <AccountCard
+                  key={account.id}
+                  account={account}
+                  compact={true}
+                  onUpdateProvider={(providerId, updates) =>
+                    updateProvider(account.id, providerId, updates)
+                  }
+                  onUpdateAccount={(updates) =>
+                    updateAccount(account.id, updates)
+                  }
+                  onDelete={() => deleteAccount(account.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            /* View Mode: Ultra-Dense Table View */
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-zinc-50 dark:bg-zinc-950/60 border-b border-zinc-200 dark:border-zinc-800 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+                    <tr>
+                      <th className="py-2.5 px-3">Account Email</th>
+                      <th className="py-2.5 px-3">Gemini Status</th>
+                      <th className="py-2.5 px-3">Claude Status</th>
+                      <th className="py-2.5 px-3">Custom Providers</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-200/60 dark:divide-zinc-800/60">
+                    {filteredAccounts.map((account) => {
+                      const gemini = account.providers.find((p) => p.name === 'Gemini');
+                      const claude = account.providers.find((p) => p.name === 'Claude');
+                      const custom = account.providers.filter(
+                        (p) => p.name !== 'Gemini' && p.name !== 'Claude' && p.enabled
+                      );
+
+                      return (
+                        <tr
+                          key={account.id}
+                          className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30 transition-colors"
+                        >
+                          <td className="py-2 px-3 font-medium text-zinc-900 dark:text-zinc-100">
+                            {account.email}
+                          </td>
+                          <td className="py-2 px-3">
+                            {gemini && gemini.enabled ? (
+                              <div className="space-y-1 max-w-[180px]">
+                                <div className="flex items-center justify-between gap-1">
+                                  <StatusBadge status={getTimerStatus(gemini.timer)} size="sm" />
+                                  <span className="text-[10px] font-mono text-zinc-400">
+                                    {formatRemainingTime(getRemainingMs(gemini.timer))}
+                                  </span>
+                                </div>
+                                <ProgressBar
+                                  percent={gemini.timer ? (getRemainingMs(gemini.timer) <= 0 ? 100 : (100 - (getRemainingMs(gemini.timer) / (gemini.timer.durationMinutes * 60000)) * 100)) : 100}
+                                  status={getTimerStatus(gemini.timer)}
+                                  size="sm"
+                                />
+                              </div>
+                            ) : (
+                              <span className="text-zinc-400 text-[11px]">—</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3">
+                            {claude && claude.enabled ? (
+                              <div className="space-y-1 max-w-[180px]">
+                                <div className="flex items-center justify-between gap-1">
+                                  <StatusBadge status={getTimerStatus(claude.timer)} size="sm" />
+                                  <span className="text-[10px] font-mono text-zinc-400">
+                                    {formatRemainingTime(getRemainingMs(claude.timer))}
+                                  </span>
+                                </div>
+                                <ProgressBar
+                                  percent={claude.timer ? (getRemainingMs(claude.timer) <= 0 ? 100 : (100 - (getRemainingMs(claude.timer) / (claude.timer.durationMinutes * 60000)) * 100)) : 100}
+                                  status={getTimerStatus(claude.timer)}
+                                  size="sm"
+                                />
+                              </div>
+                            ) : (
+                              <span className="text-zinc-400 text-[11px]">—</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3 text-[11px] text-zinc-500">
+                            {custom.length > 0
+                              ? custom.map((c) => c.name).join(', ')
+                              : 'None'}
+                          </td>
+                          <td className="py-2 px-3 text-right">
+                            <Button
+                              variant="ghost"
+                              size="xs"
+                              onClick={() => deleteAccount(account.id)}
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                            >
+                              Delete
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
         ) : accounts.length > 0 ? (
-          /* No results from search/filter */
-          <div className="text-center py-16">
-            <p className="text-zinc-500 text-sm">No accounts match your search or filter.</p>
+          /* Filtered empty state */
+          <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-8 text-center my-6">
+            <Inbox className="h-8 w-8 mx-auto text-zinc-400 mb-2 opacity-60" />
+            <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+              No matching accounts found
+            </p>
+            <p className="text-[11px] text-zinc-500 mt-0.5">
+              Try adjusting your search query or status filter.
+            </p>
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => {
+                setSearchQuery('');
+                setFilter('all');
+              }}
+              className="mt-3 text-xs"
+            >
+              Reset Filters
+            </Button>
           </div>
         ) : (
-          /* Empty State */
-          <div className="text-center py-20">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center">
-              <svg className="w-8 h-8 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+          /* Empty Initial State */
+          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/50 dark:bg-zinc-900/40 p-10 text-center max-w-lg mx-auto my-12 shadow-xs">
+            <div className="h-12 w-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+              <Timer className="h-6 w-6 text-zinc-600 dark:text-zinc-300" />
             </div>
-            <h2 className="text-lg font-semibold text-zinc-300 mb-2">
+            <h2 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100">
               No accounts yet
             </h2>
-            <p className="text-sm text-zinc-500 mb-6 max-w-sm mx-auto">
-              Add your first account to start tracking your AI quota resets.
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 mb-5 max-w-sm mx-auto leading-relaxed">
+              Add your AI accounts to automatically track reset countdowns and quota cycles.
             </p>
-            <button
-              onClick={() => setShowAddAccount(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              Add Account
-            </button>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => setShowAddAccount(true)}
+                className="gap-1.5 w-full sm:w-auto"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Your First Account
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLoadSampleAccounts}
+                className="gap-1.5 w-full sm:w-auto text-xs"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                Load 10 Sample Accounts
+              </Button>
+            </div>
           </div>
         )}
       </main>
 
-      {/* Add Account Modal */}
+      {/* Add / Edit Account Modal */}
       <AccountForm
         isOpen={showAddAccount}
         onClose={() => setShowAddAccount(false)}
@@ -276,7 +493,6 @@ export function Dashboard() {
   );
 }
 
-// Helper
 function getMinRemaining(account: Account): number {
   const enabledProviders = account.providers.filter((p) => p.enabled);
   if (enabledProviders.length === 0) return 0;
@@ -289,31 +505,4 @@ function getMinRemaining(account: Account): number {
     }
   }
   return min === Infinity ? 0 : min;
-}
-
-// Stat Card Component
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: 'zinc' | 'emerald' | 'blue' | 'amber';
-}) {
-  const colorMap = {
-    zinc: 'text-zinc-200',
-    emerald: 'text-emerald-400',
-    blue: 'text-blue-400',
-    amber: 'text-amber-400',
-  };
-
-  return (
-    <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-4">
-      <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
-        {label}
-      </p>
-      <p className={`text-2xl font-bold ${colorMap[color]}`}>{value}</p>
-    </div>
-  );
 }

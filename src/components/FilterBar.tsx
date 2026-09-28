@@ -20,7 +20,7 @@ const filters: { value: FilterOption; label: string }[] = [
 
 export function FilterBar({ value, onChange, counts }: Props) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="inline-flex h-8 items-center rounded-lg border border-zinc-200 bg-zinc-50/50 p-0.5 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
       {filters.map((filter) => {
         const isActive = value === filter.value;
         const count = counts[filter.value];
@@ -28,16 +28,18 @@ export function FilterBar({ value, onChange, counts }: Props) {
           <button
             key={filter.value}
             onClick={() => onChange(filter.value)}
-            className={`px-3 py-1.5 text-sm font-medium rounded-lg border transition-all duration-200 ${
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 cursor-pointer ${
               isActive
-                ? 'bg-blue-600/20 text-blue-400 border-blue-500/40'
-                : 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50 hover:bg-zinc-700/50 hover:text-zinc-300'
+                ? 'bg-white text-zinc-950 shadow-2xs dark:bg-zinc-800 dark:text-zinc-50 font-semibold'
+                : 'hover:text-zinc-900 dark:hover:text-zinc-200'
             }`}
           >
-            {filter.label}
+            <span>{filter.label}</span>
             <span
-              className={`ml-1.5 text-xs ${
-                isActive ? 'text-blue-400/70' : 'text-zinc-600'
+              className={`ml-1.5 rounded-full px-1 text-[10px] font-mono ${
+                isActive
+                  ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300'
+                  : 'text-zinc-400 dark:text-zinc-500'
               }`}
             >
               {count}
