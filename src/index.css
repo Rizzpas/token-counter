@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+/* Custom animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Utility classes */
+@utility animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+@utility animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* Base styles */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #09090b;
+  color: #fafafa;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+/* ─── Light Theme ─── */
+html.light body {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Light-mode: override all dark zinc backgrounds and borders */
+html.light .bg-zinc-950 { background-color: #f8fafc; }
+html.light .bg-zinc-900\/60,
+html.light .bg-zinc-900\/30 { background-color: #ffffff; }
+html.light .bg-zinc-900 { background-color: #ffffff; }
+html.light .bg-zinc-800\/50 { background-color: #f1f5f9; }
+html.light .bg-zinc-800 { background-color: #f1f5f9; }
+html.light .bg-zinc-700\/50 { background-color: #e2e8f0; }
+html.light .bg-zinc-700 { background-color: #e2e8f0; }
+
+html.light .border-zinc-800\/80 { border-color: #e2e8f0; }
+html.light .border-zinc-700\/50 { border-color: #e2e8f0; }
+html.light .border-zinc-700\/60 { border-color: #cbd5e1; }
+html.light .border-zinc-700\/30 { border-color: #e2e8f0; }
+html.light .border-zinc-800 { border-color: #e2e8f0; }
+html.light .border-zinc-800\/30 { border-color: #e2e8f0; }
+html.light .border-zinc-600\/50 { border-color: #e2e8f0; }
+
+html.light .text-zinc-100 { color: #1e293b; }
+html.light .text-zinc-200 { color: #334155; }
+html.light .text-zinc-300 { color: #475569; }
+html.light .text-zinc-400 { color: #64748b; }
+html.light .text-zinc-500 { color: #94a3b8; }
+html.light .text-zinc-600 { color: #cbd5e1; }
+html.light .text-zinc-50 { color: #0f172a; }
+
+html.light .placeholder-zinc-500::placeholder { color: #94a3b8; }
+html.light .placeholder-zinc-600::placeholder { color: #cbd5e1; }
+
+html.light .hover\:bg-zinc-800:hover { background-color: #e2e8f0; }
+html.light .hover\:bg-zinc-700:hover { background-color: #cbd5e1; }
+html.light .hover\:bg-zinc-800\/50:hover { background-color: #f1f5f9; }
+html.light .hover\:bg-zinc-700\/50:hover { background-color: #e2e8f0; }
+html.light .hover\:text-zinc-300:hover { color: #475569; }
+html.light .hover\:text-zinc-200:hover { color: #334155; }
+html.light .hover\:text-zinc-100:hover { color: #1e293b; }
+html.light .hover\:border-zinc-700\/60:hover { border-color: #cbd5e1; }
+
+/* Light mode: progress bar track */
+html.light .bg-white\/5 { background-color: #e2e8f0; }
+
+/* Light mode: modal backdrop  */
+html.light .bg-black\/60 { background-color: rgba(0, 0, 0, 0.3); }
+
+/* Select styling */
+select option {
+  background-color: #27272a;
+  color: #d4d4d8;
+}
+html.light select option {
+  background-color: #ffffff;
+  color: #334155;
+}
+
+/* Radio & Checkbox styling */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: #2563eb;
+}
+
+/* datetime-local styling for dark mode */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+}
+html.light input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: none;
+}
