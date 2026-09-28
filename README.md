@@ -67,6 +67,10 @@ A workflow is already included in `.github/workflows/deploy.yml`.
 3. Build command: `npm run build`, Publish directory: `dist`.
 4. Click **Deploy**.
 
+## 👤 Author
+
+Created by **Jonathan** ([@Rizzpas](https://github.com/Rizzpas))
+
 ## 📄 License
 
 MIT

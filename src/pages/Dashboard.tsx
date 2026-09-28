@@ -456,6 +456,28 @@ export function Dashboard() {
         )}
       </main>
 
+      {/* Simple Shadcn Footer */}
+      <footer className="border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white/50 dark:bg-zinc-950/50 py-2.5 mt-auto">
+        <div className="max-w-[1720px] mx-auto px-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-zinc-700 dark:text-zinc-300">QuotaTrack</span>
+            <span>·</span>
+            <span>AI Quota & Reset Tracker</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span>Built by</span>
+            <a
+              href="https://github.com/Rizzpas"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors underline-offset-4 hover:underline"
+            >
+              Jonathan (@Rizzpas)
+            </a>
+          </div>
+        </div>
+      </footer>
+
       {/* Add / Edit Account Modal */}
       <AccountForm
         isOpen={showAddAccount}
