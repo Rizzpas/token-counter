@@ -103,24 +103,14 @@ export function useAccounts() {
     setSettingsState((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  // Stats
+  // Stats: strictly Total, Ready, Not Ready
   const stats = {
     total: accounts.length,
     ready: accounts.filter((a) =>
       a.providers.filter((p) => p.enabled).every((p) => !p.timer || isTimerExpired(p.timer))
     ).length,
-    active: accounts.filter((a) =>
+    notReady: accounts.filter((a) =>
       a.providers.filter((p) => p.enabled).some((p) => p.timer && !isTimerExpired(p.timer))
-    ).length,
-    expiringSoon: accounts.filter((a) =>
-      a.providers
-        .filter((p) => p.enabled)
-        .some(
-          (p) =>
-            p.timer &&
-            !isTimerExpired(p.timer) &&
-            (getTimerStatus(p.timer) === 'expiring-soon' || getTimerStatus(p.timer) === 'almost-ready')
-        )
     ).length,
   };
 

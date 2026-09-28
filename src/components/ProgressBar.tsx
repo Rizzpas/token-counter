@@ -8,9 +8,7 @@ type Props = {
 
 const barColors: Record<TimerStatus, string> = {
   ready: 'bg-emerald-500',
-  active: 'bg-blue-500',
-  'expiring-soon': 'bg-amber-500',
-  'almost-ready': 'bg-orange-500',
+  'not-ready': 'bg-amber-500',
 };
 
 export function ProgressBar({ percent, status, size = 'default' }: Props) {

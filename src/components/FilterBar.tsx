@@ -6,16 +6,14 @@ type Props = {
   counts: {
     all: number;
     ready: number;
-    active: number;
-    'expiring-soon': number;
+    'not-ready': number;
   };
 };
 
 const filters: { value: FilterOption; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'ready', label: 'Ready' },
-  { value: 'active', label: 'Active' },
-  { value: 'expiring-soon', label: 'Expiring Soon' },
+  { value: 'not-ready', label: 'Not Ready' },
 ];
 
 export function FilterBar({ value, onChange, counts }: Props) {

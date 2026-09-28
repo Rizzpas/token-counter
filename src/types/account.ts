@@ -40,7 +40,7 @@ export type SortOption =
   | 'ready-first'
   | 'recently-added';
 
-export type FilterOption = 'all' | 'ready' | 'active' | 'expiring-soon';
+export type FilterOption = 'all' | 'ready' | 'not-ready';
 
 export const DEFAULT_PROVIDERS: Pick<Provider, 'name' | 'defaultDurationMinutes'>[] = [
   { name: 'Gemini', defaultDurationMinutes: 7 * 24 * 60 },

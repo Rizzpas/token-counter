@@ -1,6 +1,6 @@
 import type { TimerState } from '../types/account';
 
-export type TimerStatus = 'ready' | 'active' | 'expiring-soon' | 'almost-ready';
+export type TimerStatus = 'ready' | 'not-ready';
 
 export function getTimerStatus(timer?: TimerState): TimerStatus {
   if (!timer) return 'ready';
@@ -10,9 +10,7 @@ export function getTimerStatus(timer?: TimerState): TimerStatus {
   const remaining = resetAt - now;
 
   if (remaining <= 0) return 'ready';
-  if (remaining <= 60 * 60 * 1000) return 'almost-ready';     // < 1 hour
-  if (remaining <= 24 * 60 * 60 * 1000) return 'expiring-soon'; // < 24 hours
-  return 'active';
+  return 'not-ready';
 }
 
 export function getRemainingMs(timer?: TimerState): number {

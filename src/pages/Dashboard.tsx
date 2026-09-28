@@ -58,23 +58,14 @@ export function Dashboard() {
       result = result.filter((a) => a.email.toLowerCase().includes(q));
     }
 
-    // Filter
+    // Filter: strictly Ready or Not Ready
     if (filter === 'ready') {
       result = result.filter((a) =>
         a.providers.filter((p) => p.enabled).every((p) => !p.timer || isTimerExpired(p.timer))
       );
-    } else if (filter === 'active') {
+    } else if (filter === 'not-ready') {
       result = result.filter((a) =>
         a.providers.filter((p) => p.enabled).some((p) => p.timer && !isTimerExpired(p.timer))
-      );
-    } else if (filter === 'expiring-soon') {
-      result = result.filter((a) =>
-        a.providers
-          .filter((p) => p.enabled)
-          .some((p) => {
-            const status = getTimerStatus(p.timer);
-            return status === 'expiring-soon' || status === 'almost-ready';
-          })
       );
     }
 
@@ -120,8 +111,7 @@ export function Dashboard() {
     () => ({
       all: accounts.length,
       ready: stats.ready,
-      active: stats.active,
-      'expiring-soon': stats.expiringSoon,
+      'not-ready': stats.notReady,
     }),
     [accounts.length, stats]
   );
