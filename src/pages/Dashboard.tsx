@@ -227,22 +227,20 @@ export function Dashboard() {
               <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-md p-0.5 bg-zinc-100/50 dark:bg-zinc-900/50">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-1 rounded text-xs transition-colors ${
-                    viewMode === 'grid'
+                  className={`p-1 rounded text-xs transition-colors ${viewMode === 'grid'
                       ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-2xs'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
-                  }`}
+                    }`}
                   title="Compact Grid View (fits 10+ cards)"
                 >
                   <LayoutGrid className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={() => setViewMode('table')}
-                  className={`p-1 rounded text-xs transition-colors ${
-                    viewMode === 'table'
+                  className={`p-1 rounded text-xs transition-colors ${viewMode === 'table'
                       ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-2xs'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
-                  }`}
+                    }`}
                   title="Dense Table View"
                 >
                   <List className="h-3.5 w-3.5" />
@@ -462,7 +460,7 @@ export function Dashboard() {
           <div className="flex items-center gap-1.5">
             <span className="font-semibold text-zinc-700 dark:text-zinc-300">QuotaTrack</span>
             <span>·</span>
-            <span>AI Quota & Reset Tracker</span>
+            <span>AI Quota & Reset Tracker for Antigravity IDE</span>
           </div>
           <div className="flex items-center gap-1">
             <span>Built by</span>
